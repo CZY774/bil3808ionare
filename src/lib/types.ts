@@ -26,7 +26,7 @@ export interface BillMember {
 	proof_url: string | null;
 	status: 'lunas' | 'belum';
 	updated_at: string;
-	paid_at?: string;
+	paid_at: string | null;
 }
 
 export interface BillWithMembers extends Bill {
@@ -39,16 +39,16 @@ export interface AuditLog {
 	actor_id: string;
 	bill_id: string;
 	action: string;
-	old_value?: string;
-	new_value?: string;
-	member_id?: string;
+	old_value: string | null;
+	new_value: string | null;
+	member_id: string | null;
 	timestamp: string;
 }
 
 export interface AuditLogWithDetails extends AuditLog {
 	actor: User;
-	bill: Bill;
-	member?: User;
+	bill: Pick<Bill, 'id' | 'title'>;
+	member: User | null;
 }
 
 export interface Database {
