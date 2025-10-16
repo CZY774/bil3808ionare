@@ -11,7 +11,7 @@
 	} from '$lib/utils';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import BillCard from '$lib/components/BillCard.svelte';
-	import { Plus, AlertCircle } from 'lucide-svelte';
+	import { Plus, AlertCircle, Shield } from 'lucide-svelte';
 	import type { BillWithMembers } from '$lib/types';
 
 	let loading = true;
@@ -84,10 +84,21 @@
 				</p>
 			</div>
 
-			<button on:click={() => goto('/bills/create')} class="btn-primary flex items-center gap-2">
-				<Plus class="h-5 w-5" />
-				<span class="hidden sm:inline">Buat Tagihan Baru</span>
-			</button>
+			<div class="flex items-center gap-3">
+				<button 
+					on:click={() => goto('/admin')} 
+					class="btn-secondary flex items-center gap-2"
+					title="Masuk Mode Admin"
+				>
+					<Shield class="h-5 w-5" />
+					<span class="hidden sm:inline">Mode Admin</span>
+				</button>
+				
+				<button on:click={() => goto('/bills/create')} class="btn-primary flex items-center gap-2">
+					<Plus class="h-5 w-5" />
+					<span class="hidden sm:inline">Buat Tagihan Baru</span>
+				</button>
+			</div>
 		</div>
 
 		{#if loading}
