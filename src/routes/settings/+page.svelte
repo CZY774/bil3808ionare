@@ -4,6 +4,7 @@
 	import { currentUser, userProfile } from '$lib/stores';
 	import { supabase } from '$lib/supabaseClient';
 	import Navbar from '$lib/components/Navbar.svelte';
+	import ReminderToggle from '$lib/components/ReminderToggle.svelte';
 	import { Bell, Mail, Smartphone, Save, AlertCircle, CheckCircle } from 'lucide-svelte';
 
 	let loading = false;
