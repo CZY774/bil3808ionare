@@ -34,7 +34,7 @@ export class NotificationManager {
 			if (!granted) return;
 		}
 
-		const defaultOptions: NotificationOptions = {
+		const defaultOptions: any = {
 			icon: '/favicon.svg',
 			badge: '/favicon.svg',
 			vibrate: [100, 50, 100],
@@ -55,18 +55,8 @@ export class NotificationManager {
 	async showBillReminder(billTitle: string, amount: number, deadline: string): Promise<void> {
 		await this.showNotification('Reminder Tagihan', {
 			body: `${billTitle} - Rp ${amount.toLocaleString()}\nDeadline: ${deadline}`,
-			tag: 'bill-reminder',
-			actions: [
-				{
-					action: 'view',
-					title: 'Lihat Tagihan'
-				},
-				{
-					action: 'dismiss',
-					title: 'Tutup'
-				}
-			]
-		});
+			tag: 'bill-reminder'
+		} as any);
 	}
 
 	async showPaymentConfirmation(billTitle: string): Promise<void> {
