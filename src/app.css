@@ -1,3 +1,79 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Custom Theme Variables */
+@theme {
+	--color-primary-dark: #240f0f;
+	--color-primary-pink: #f8d0d8;
+	--color-primary-light: #ffffff;
+	--color-status-lunas: #10b981;
+	--color-status-belum: #f59e0b;
+}
+
+/* Base Styles */
+@layer base {
+	body {
+		background-color: var(--color-primary-dark);
+		color: var(--color-primary-light);
+		font-family:
+			system-ui,
+			-apple-system,
+			sans-serif;
+	}
+}
+
+/* Custom Utilities */
+@layer utilities {
+	.glass-card {
+		background-color: rgb(255 255 255 / 0.05);
+		backdrop-filter: blur(12px);
+		border: 1px solid rgb(255 255 255 / 0.1);
+		border-radius: 0.75rem;
+	}
+
+	.btn-primary {
+		background-color: var(--color-primary-pink);
+		color: var(--color-primary-dark);
+		font-weight: 600;
+		padding: 0.75rem 1.5rem;
+		border-radius: 0.5rem;
+		transition: background-color 0.2s;
+	}
+
+	.btn-primary:hover {
+		background-color: rgb(248 208 216 / 0.9);
+	}
+
+	.btn-secondary {
+		background-color: rgb(255 255 255 / 0.1);
+		color: var(--color-primary-light);
+		font-weight: 600;
+		padding: 0.75rem 1.5rem;
+		border-radius: 0.5rem;
+		border: 1px solid rgb(255 255 255 / 0.2);
+		transition: background-color 0.2s;
+	}
+
+	.btn-secondary:hover {
+		background-color: rgb(255 255 255 / 0.2);
+	}
+
+	.badge-lunas {
+		background-color: var(--color-status-lunas);
+		color: white;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+
+	.badge-belum {
+		background-color: var(--color-status-belum);
+		color: white;
+		padding: 0.25rem 0.75rem;
+		border-radius: 9999px;
+		font-size: 0.875rem;
+		font-weight: 500;
+	}
+}
