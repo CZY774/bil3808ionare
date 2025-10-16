@@ -19,9 +19,6 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between p-6">
 		<div class="flex items-center gap-3">
-			<div class="w-8 h-8 bg-[#f8d0d8] rounded-lg flex items-center justify-center">
-				<DollarSign class="w-5 h-5 text-[#240f0f]" />
-			</div>
 			<span class="text-xl font-semibold">Bil3808ionaire</span>
 		</div>
 		<div class="flex gap-4">
@@ -48,8 +45,8 @@
 				<span class="text-[#f8d0d8]">8 Teman Sekamar</span>
 			</h1>
 			
-			<p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto">
-				Buat tagihan, bagikan otomatis, upload bukti pembayaran
+			<p class="text-xl text-gray-300 mb-12 max-w-2xl mx-auto italic">
+				"Trust is good, proof is better." — Bil3808ionaire
 			</p>
 
 			<div class="flex flex-col sm:flex-row gap-4 justify-center mb-16">
@@ -57,14 +54,14 @@
 					on:click={() => goto('/register')}
 					class="px-8 py-4 bg-[#f8d0d8] text-[#240f0f] rounded-lg font-semibold text-lg hover:bg-white transition-colors flex items-center justify-center gap-2"
 				>
-					Mulai Sekarang
+					Mulai
 					<ArrowRight class="w-5 h-5" />
 				</button>
 				<button
 					on:click={() => goto('/login')}
 					class="px-8 py-4 border border-gray-600 rounded-lg font-semibold text-lg hover:border-gray-400 transition-colors"
 				>
-					Sudah Punya Akun
+					Masuk
 				</button>
 			</div>
 
