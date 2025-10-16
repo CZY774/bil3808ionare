@@ -63,35 +63,32 @@
 		error = '';
 
 		try {
+			console.log('Verifying OTP:', { email: adminEmail, token: otpCode });
+			
 			const { data, error: verifyError } = await supabase.auth.verifyOtp({
 				email: adminEmail,
 				token: otpCode.trim(),
 				type: 'email'
 			});
 
+			console.log('OTP Response:', { data, error: verifyError });
+
 			if (verifyError) {
-				console.error('OTP Verification Error:', verifyError);
 				throw verifyError;
 			}
 
-			if (data?.user) {
-				isAdminMode.set(true);
-				step = 'dashboard';
-				await loadAdminData();
-			} else {
-				throw new Error('Verifikasi gagal - tidak ada user data');
-			}
+			// Set admin mode dan langsung ke dashboard
+			isAdminMode.set(true);
+			step = 'dashboard';
+			
+			// Load data admin
+			console.log('Loading admin data...');
+			await loadAdminData();
+			console.log('Admin mode activated successfully');
+			
 		} catch (err: any) {
 			console.error('Verify OTP Error:', err);
-			if (err.message?.includes('429')) {
-				error = 'Terlalu banyak percobaan. Tunggu beberapa menit.';
-			} else if (err.message?.includes('expired')) {
-				error = 'Kode OTP sudah expired. Minta kode baru.';
-			} else if (err.message?.includes('invalid')) {
-				error = 'Kode OTP tidak valid. Periksa kembali.';
-			} else {
-				error = err.message || 'Kode OTP tidak valid';
-			}
+			error = `Verifikasi gagal: ${err.message}`;
 		} finally {
 			loading = false;
 		}
@@ -99,6 +96,7 @@
 
 	async function loadAdminData() {
 		try {
+			console.log('Loading bills...');
 			// Load all bills
 			const { data: billsData, error: billsError } = await supabase
 				.from('bills')
@@ -112,7 +110,12 @@
 				`)
 				.order('created_at', { ascending: false });
 
-			if (billsError) throw billsError;
+			if (billsError) {
+				console.error('Bills error:', billsError);
+				throw billsError;
+			}
+			
+			console.log('Bills loaded:', billsData?.length || 0);
 			bills = (billsData || []).map(bill => ({
 				...bill,
 				members: bill.members.map(member => ({
@@ -121,6 +124,7 @@
 				}))
 			}));
 
+			console.log('Loading audit logs...');
 			// Load audit logs
 			const { data: logsData, error: logsError } = await supabase
 				.from('audit_logs')
@@ -133,10 +137,17 @@
 				.order('timestamp', { ascending: false })
 				.limit(50);
 
-			if (logsError) throw logsError;
+			if (logsError) {
+				console.error('Logs error:', logsError);
+				throw logsError;
+			}
+			
+			console.log('Audit logs loaded:', logsData?.length || 0);
 			auditLogs = logsData || [];
+			
 		} catch (err) {
 			console.error('Error loading admin data:', err);
+			error = `Gagal memuat data: ${err.message}`;
 		}
 	}
 
