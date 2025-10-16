@@ -145,7 +145,7 @@
 			console.log('Audit logs loaded:', logsData?.length || 0);
 			auditLogs = logsData || [];
 			
-		} catch (err) {
+		} catch (err: any) {
 			console.error('Error loading admin data:', err);
 			error = `Gagal memuat data: ${err.message}`;
 		}
