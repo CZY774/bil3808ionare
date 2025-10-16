@@ -1,5 +1,6 @@
 import { writable, derived, type Readable } from 'svelte/store';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import type { User, BillWithMembers } from './types.js';
 
 // Auth store
 export const currentUser = writable<SupabaseUser | null>(null);
@@ -23,7 +24,7 @@ export const unpaidBills: Readable<BillWithMembers[]> = derived(
 	([$bills, $currentUser]) => {
 		if (!$currentUser) return [];
 		return $bills.filter((bill) =>
-			bill.members.some((m) => m.member_id === $currentUser.id && m.status === 'belum')
+			bill.members.some((m: any) => m.member_id === $currentUser.id && m.status === 'belum')
 		);
 	}
 );
