@@ -91,6 +91,6 @@
 		<div
 			class="h-full bg-status-lunas transition-all duration-500"
 			style="width: {(paidCount / totalMembers) * 100}%"
-		/>
+		></div>
 	</div>
 </button>
