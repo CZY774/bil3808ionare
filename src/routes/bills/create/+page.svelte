@@ -168,10 +168,9 @@
 							bind:value={description}
 							placeholder="Catatan tambahan..."
 							rows="3"
-							class="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-4
-                     py-3 transition-colors focus:border-primary-pink focus:outline-none"
+							class="w-full resize-none rounded-lg border border-white/10 bg-white/5 px-4 py-3 transition-colors focus:border-primary-pink focus:outline-none"
 							disabled={loading}
-						/>
+						></textarea>
 					</div>
 
 					<div class="grid gap-4 sm:grid-cols-2">
