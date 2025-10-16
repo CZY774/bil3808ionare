@@ -156,6 +156,14 @@
 		error = '';
 
 		try {
+			// Get current status for audit log
+			const currentMember = bills
+				.find(b => b.id === billId)
+				?.members.find(m => m.member_id === memberId);
+			
+			if (!currentMember) throw new Error('Member not found');
+			const oldStatus = currentMember.status;
+
 			const { error: updateError } = await supabase
 				.from('bill_members')
 				.update({ status: newStatus })
@@ -163,6 +171,22 @@
 				.eq('member_id', memberId);
 
 			if (updateError) throw updateError;
+
+			// Call audit logger function
+			try {
+				await supabase.functions.invoke('audit-logger', {
+					body: {
+						action: 'status_change',
+						bill_id: billId,
+						member_id: memberId,
+						old_value: oldStatus,
+						new_value: newStatus,
+						actor_email: adminEmail
+					}
+				});
+			} catch (auditError) {
+				console.warn('Audit log failed:', auditError);
+			}
 
 			await loadAdminData(); // Refresh data
 		} catch (err: any) {
