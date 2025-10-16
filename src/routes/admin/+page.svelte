@@ -92,7 +92,13 @@
 				.order('created_at', { ascending: false });
 
 			if (billsError) throw billsError;
-			bills = billsData || [];
+			bills = (billsData || []).map(bill => ({
+				...bill,
+				members: bill.members.map(member => ({
+					...member,
+					status: member.status as 'lunas' | 'belum'
+				}))
+			}));
 
 			// Load audit logs
 			const { data: logsData, error: logsError } = await supabase
