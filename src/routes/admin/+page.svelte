@@ -7,8 +7,8 @@
 	import type { BillWithMembers, AuditLogWithDetails } from '$lib/types';
 
 	let adminEmail = '';
-	let adminPassword = '';
-	let step: 'login' | 'dashboard' = 'login';
+	let otpCode = '';
+	let step: 'email' | 'otp' | 'dashboard' = 'email';
 	let loading = false;
 	let error = '';
 	let bills: BillWithMembers[] = [];
@@ -21,9 +21,9 @@
 		}
 	});
 
-	async function loginAdmin() {
-		if (!adminEmail || !adminPassword) {
-			error = 'Email dan password harus diisi';
+	async function sendOTP() {
+		if (!adminEmail) {
+			error = 'Email harus diisi';
 			return;
 		}
 
@@ -31,18 +31,43 @@
 		error = '';
 
 		try {
-			const { data, error: loginError } = await supabase.auth.signInWithPassword({
-				email: adminEmail,
-				password: adminPassword
+			const { error: otpError } = await supabase.auth.signInWithOtp({
+				email: adminEmail
 			});
 
-			if (loginError) throw loginError;
+			if (otpError) throw otpError;
+
+			step = 'otp';
+		} catch (err: any) {
+			error = err.message || 'Gagal mengirim OTP';
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function verifyOTP() {
+		if (!otpCode) {
+			error = 'Kode OTP harus diisi';
+			return;
+		}
+
+		loading = true;
+		error = '';
+
+		try {
+			const { data, error: verifyError } = await supabase.auth.verifyOtp({
+				email: adminEmail,
+				token: otpCode,
+				type: 'email'
+			});
+
+			if (verifyError) throw verifyError;
 
 			isAdminMode.set(true);
 			step = 'dashboard';
 			await loadAdminData();
 		} catch (err: any) {
-			error = err.message || 'Login gagal';
+			error = err.message || 'Kode OTP tidak valid';
 		} finally {
 			loading = false;
 		}
@@ -114,9 +139,9 @@
 
 	function exitAdminMode() {
 		isAdminMode.set(false);
-		step = 'login';
+		step = 'email';
 		adminEmail = '';
-		adminPassword = '';
+		otpCode = '';
 		bills = [];
 		auditLogs = [];
 	}
@@ -124,13 +149,13 @@
 
 <div class="min-h-screen p-4 sm:p-6 lg:p-8">
 	<div class="mx-auto max-w-6xl">
-		{#if step === 'login'}
+		{#if step === 'email'}
 			<div class="flex min-h-screen items-center justify-center">
 				<div class="glass-card w-full max-w-md p-8">
 					<div class="mb-8 text-center">
 						<Shield class="mx-auto mb-4 h-16 w-16 text-primary-pink" />
 						<h1 class="mb-2 text-3xl font-bold">Mode Admin</h1>
-						<p class="text-white/60">Login dengan akun admin</p>
+						<p class="text-white/60">Masukkan email admin untuk verifikasi</p>
 					</div>
 
 					{#if error}
@@ -139,7 +164,7 @@
 						</div>
 					{/if}
 
-					<form on:submit|preventDefault={loginAdmin} class="space-y-4">
+					<form on:submit|preventDefault={sendOTP} class="space-y-4">
 						<div>
 							<label for="adminEmail" class="mb-2 block text-sm font-medium">Email Admin</label>
 							<div class="relative">
@@ -156,30 +181,65 @@
 							</div>
 						</div>
 
-						<div>
-							<label for="adminPassword" class="mb-2 block text-sm font-medium">Password</label>
-							<div class="relative">
-								<Key class="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 text-white/40" />
-								<input
-									id="adminPassword"
-									type="password"
-									bind:value={adminPassword}
-									placeholder="Password admin"
-									class="w-full rounded-lg border border-white/10 bg-white/5 py-3 pr-4 pl-11
-									transition-colors focus:border-primary-pink focus:outline-none"
-									disabled={loading}
-								/>
-							</div>
-						</div>
-
 						<button type="submit" class="btn-primary w-full" disabled={loading}>
 							{#if loading}
 								<span class="animate-spin">⏳</span>
-								Login...
+								Mengirim OTP...
 							{:else}
-								Login Admin
+								Kirim Kode OTP
 							{/if}
 						</button>
+					</form>
+				</div>
+			</div>
+		{:else if step === 'otp'}
+			<div class="flex min-h-screen items-center justify-center">
+				<div class="glass-card w-full max-w-md p-8">
+					<div class="mb-8 text-center">
+						<Key class="mx-auto mb-4 h-16 w-16 text-primary-pink" />
+						<h1 class="mb-2 text-3xl font-bold">Verifikasi OTP</h1>
+						<p class="text-white/60">Masukkan kode OTP yang dikirim ke {adminEmail}</p>
+					</div>
+
+					{#if error}
+						<div class="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-red-200">
+							{error}
+						</div>
+					{/if}
+
+					<form on:submit|preventDefault={verifyOTP} class="space-y-4">
+						<div>
+							<label for="otpCode" class="mb-2 block text-sm font-medium">Kode OTP</label>
+							<input
+								id="otpCode"
+								type="text"
+								bind:value={otpCode}
+								placeholder="123456"
+								class="w-full rounded-lg border border-white/10 bg-white/5 py-3 px-4
+								transition-colors focus:border-primary-pink focus:outline-none text-center text-2xl tracking-widest"
+								disabled={loading}
+								maxlength="6"
+							/>
+						</div>
+
+						<div class="flex gap-3">
+							<button
+								type="button"
+								on:click={() => (step = 'email')}
+								class="btn-secondary flex-1"
+								disabled={loading}
+							>
+								Kembali
+							</button>
+							<button type="submit" class="btn-primary flex-1" disabled={loading}>
+								{#if loading}
+									<span class="animate-spin">⏳</span>
+									Verifikasi...
+								{:else}
+									Verifikasi
+								{/if}
+							</button>
+						</div>
 					</form>
 				</div>
 			</div>
