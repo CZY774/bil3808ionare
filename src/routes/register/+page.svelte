@@ -31,7 +31,10 @@
 			error = 'Password tidak cocok';
 			return;
 		}
-
+		if (!bankAccount1 || !bankAccount2 || !ewalletMethod) {
+			error = 'Semua metode pembayaran harus diisi';
+			return;
+		}
 		loading = true;
 		error = '';
 
