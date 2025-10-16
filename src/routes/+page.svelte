@@ -19,10 +19,7 @@
 	<!-- Header -->
 	<header class="flex items-center justify-between p-6">
 		<div class="flex items-center gap-3">
-			<div class="w-8 h-8 bg-[#f8d0d8] rounded-lg flex items-center justify-center">
-				<DollarSign class="w-5 h-5 text-[#240f0f]" />
-			</div>
-			<span class="text-xl font-semibold">Bil3808ionaire</span>
+			<img src="/favicon.svg" alt="Bil3808ionaire" class="w-14 h-14" />
 		</div>
 		<button
 			on:click={() => goto('/login')}
