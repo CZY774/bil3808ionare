@@ -48,7 +48,52 @@
 			console.error('Error loading users:', err);
 		} finally {
 			loadingUsers = false;
+	async function createBill() {
+		if (!title || !amount || !deadline || selectedMembers.length === 0) {
+			error = 'Semua field harus diisi dan pilih minimal 1 anggota';
+			return;
 		}
+
+		loading = true;
+		error = '';
+
+		try {
+			// Create bill
+			const { data: billData, error: billError } = await supabase
+				.from('bills')
+				.insert({
+					creator_id: $currentUser!.id,
+					title,
+					description: description || null,
+					amount,
+					per_person: amount / selectedMembers.length,
+					deadline
+				})
+				.select()
+				.single();
+
+			if (billError) throw billError;
+
+			// Add members
+			const memberInserts = selectedMembers.map(memberId => ({
+				bill_id: billData.id,
+				member_id: memberId,
+				status: 'belum' as const
+			}));
+
+			const { error: membersError } = await supabase
+				.from('bill_members')
+				.insert(memberInserts);
+
+			if (membersError) throw membersError;
+
+			goto(`/bills/${billData.id}`);
+		} catch (err: any) {
+			error = err.message || 'Gagal membuat tagihan';
+		} finally {
+			loading = false;
+		}
+	}		}
 	}
 
 	function toggleMember(userId: string) {
