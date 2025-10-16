@@ -63,7 +63,7 @@
           )
         `
 				)
-				.eq('id', billId)
+				.eq('id', billId as string)
 				.single();
 
 			if (fetchError) throw fetchError;
