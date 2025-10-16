@@ -83,10 +83,10 @@
 				.from('bills')
 				.select(`
 					*,
-					creator:users!bills_creator_id_fkey(id, full_name, email),
+					creator:users!bills_creator_id_fkey(*),
 					members:bill_members(
 						*,
-						user:users!bill_members_member_id_fkey(id, full_name, email)
+						user:users!bill_members_member_id_fkey(*)
 					)
 				`)
 				.order('created_at', { ascending: false });
@@ -99,9 +99,9 @@
 				.from('audit_logs')
 				.select(`
 					*,
-					actor:users!audit_logs_actor_id_fkey(id, full_name, email),
+					actor:users!audit_logs_actor_id_fkey(*),
 					bill:bills!audit_logs_bill_id_fkey(id, title),
-					member:users!audit_logs_member_id_fkey(id, full_name, email)
+					member:users!audit_logs_member_id_fkey(*)
 				`)
 				.order('timestamp', { ascending: false })
 				.limit(50);
