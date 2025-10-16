@@ -31,8 +31,16 @@
 		error = '';
 
 		try {
+			// Request OTP dengan type 'email' untuk mendapatkan 6-digit code
 			const { error: otpError } = await supabase.auth.signInWithOtp({
-				email: adminEmail
+				email: adminEmail,
+				options: {
+					shouldCreateUser: false,
+					data: {
+						// Metadata untuk membedakan admin request
+						admin_request: true
+					}
+				}
 			});
 
 			if (otpError) throw otpError;
@@ -57,17 +65,33 @@
 		try {
 			const { data, error: verifyError } = await supabase.auth.verifyOtp({
 				email: adminEmail,
-				token: otpCode,
+				token: otpCode.trim(),
 				type: 'email'
 			});
 
-			if (verifyError) throw verifyError;
+			if (verifyError) {
+				console.error('OTP Verification Error:', verifyError);
+				throw verifyError;
+			}
 
-			isAdminMode.set(true);
-			step = 'dashboard';
-			await loadAdminData();
+			if (data?.user) {
+				isAdminMode.set(true);
+				step = 'dashboard';
+				await loadAdminData();
+			} else {
+				throw new Error('Verifikasi gagal - tidak ada user data');
+			}
 		} catch (err: any) {
-			error = err.message || 'Kode OTP tidak valid';
+			console.error('Verify OTP Error:', err);
+			if (err.message?.includes('429')) {
+				error = 'Terlalu banyak percobaan. Tunggu beberapa menit.';
+			} else if (err.message?.includes('expired')) {
+				error = 'Kode OTP sudah expired. Minta kode baru.';
+			} else if (err.message?.includes('invalid')) {
+				error = 'Kode OTP tidak valid. Periksa kembali.';
+			} else {
+				error = err.message || 'Kode OTP tidak valid';
+			}
 		} finally {
 			loading = false;
 		}
@@ -230,6 +254,14 @@
 								disabled={loading}
 							>
 								Kembali
+							</button>
+							<button
+								type="button"
+								on:click={sendOTP}
+								class="btn-secondary flex-1"
+								disabled={loading}
+							>
+								Kirim Ulang
 							</button>
 							<button type="submit" class="btn-primary flex-1" disabled={loading}>
 								{#if loading}
