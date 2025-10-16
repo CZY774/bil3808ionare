@@ -11,6 +11,7 @@
 	} from '$lib/utils';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import BillCard from '$lib/components/BillCard.svelte';
+	import { NotificationManager } from '$lib/notification';
 	import { Plus, AlertCircle, Shield } from 'lucide-svelte';
 	import type { BillWithMembers } from '$lib/types';
 
@@ -62,6 +63,21 @@
 				paidBills = myBills.filter((bill) =>
 					bill.members.every((m) => m.member_id !== $currentUser!.id || m.status === 'lunas')
 				);
+
+				// Check for upcoming deadlines and show notifications
+				const notificationManager = NotificationManager.getInstance();
+				const upcomingBills = unpaidBills.filter(bill => isDeadlineApproaching(bill.deadline));
+				
+				for (const bill of upcomingBills) {
+					const daysLeft = daysUntilDeadline(bill.deadline);
+					if (daysLeft <= 1 && daysLeft >= 0) {
+						await notificationManager.showBillReminder(
+							bill.title,
+							bill.per_person,
+							formatDateShort(bill.deadline)
+						);
+					}
+				}
 			}
 		} catch (err) {
 			console.error('Error loading bills:', err);
