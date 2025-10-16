@@ -223,8 +223,9 @@
 			{#if !isPaid && myMembership}
 				<ProofUpload
 					billId={bill.id}
-					membershipId={myMembership.id}
-					on:uploaded={handleProofUploaded}
+					memberId={myMembership.member_id}
+					billTitle={bill.title}
+					currentProofUrl={myMembership.proof_url}					onUploadSuccess={handleProofUploaded}
 				/>
 			{/if}
 
