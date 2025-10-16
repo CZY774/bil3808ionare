@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: Inter-Bold, Inter;
+        font-size: 122.2px;
+        font-weight: 700;
+      }
+
+      .cls-1, .cls-2 {
+        isolation: isolate;
+      }
+
+      .cls-3 {
+        fill: #f8d0d8;
+      }
+
+      .cls-4 {
+        fill: #240f0f;
+        stroke-width: 0px;
+      }
+
+      .cls-5 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <rect class="cls-4" width="512" height="512"/>
+  <g class="cls-2">
+    <g class="cls-2">
+      <text class="cls-1" transform="translate(47.3 233.5)"><tspan class="cls-3"><tspan x="0" y="0">Bil</tspan></tspan><tspan class="cls-5"><tspan x="0" y="107.7">3808</tspan></tspan><tspan class="cls-3"><tspan x="0" y="215.5">ionare</tspan></tspan></text>
+    </g>
+  </g>
+</svg>
