@@ -31,16 +31,8 @@
 		error = '';
 
 		try {
-			// Request OTP dengan type 'email' untuk mendapatkan 6-digit code
-			const { error: otpError } = await supabase.auth.signInWithOtp({
-				email: adminEmail,
-				options: {
-					shouldCreateUser: false,
-					data: {
-						// Metadata untuk membedakan admin request
-						admin_request: true
-					}
-				}
+			const { data, error: otpError } = await supabase.functions.invoke('send-admin-otp', {
+				body: { email: adminEmail }
 			});
 
 			if (otpError) throw otpError;
@@ -63,31 +55,21 @@
 		error = '';
 
 		try {
-			console.log('Verifying OTP:', { email: adminEmail, token: otpCode });
-			
-			const { data, error: verifyError } = await supabase.auth.verifyOtp({
-				email: adminEmail,
-				token: otpCode.trim(),
-				type: 'email'
+			const { data, error: verifyError } = await supabase.functions.invoke('verify-admin-otp', {
+				body: {
+					email: adminEmail,
+					otp: otpCode.trim()
+				}
 			});
 
-			console.log('OTP Response:', { data, error: verifyError });
-
-			if (verifyError) {
-				throw verifyError;
-			}
+			if (verifyError) throw verifyError;
 
 			// Set admin mode dan langsung ke dashboard
 			isAdminMode.set(true);
 			step = 'dashboard';
-			
-			// Load data admin
-			console.log('Loading admin data...');
+
 			await loadAdminData();
-			console.log('Admin mode activated successfully');
-			
 		} catch (err: any) {
-			console.error('Verify OTP Error:', err);
 			error = `Verifikasi gagal: ${err.message}`;
 		} finally {
 			loading = false;
@@ -100,25 +82,27 @@
 			// Load all bills
 			const { data: billsData, error: billsError } = await supabase
 				.from('bills')
-				.select(`
+				.select(
+					`
 					*,
 					creator:users!bills_creator_id_fkey(*),
 					members:bill_members(
 						*,
 						user:users!bill_members_member_id_fkey(*)
 					)
-				`)
+				`
+				)
 				.order('created_at', { ascending: false });
 
 			if (billsError) {
 				console.error('Bills error:', billsError);
 				throw billsError;
 			}
-			
+
 			console.log('Bills loaded:', billsData?.length || 0);
-			bills = (billsData || []).map(bill => ({
+			bills = (billsData || []).map((bill) => ({
 				...bill,
-				members: bill.members.map(member => ({
+				members: bill.members.map((member) => ({
 					...member,
 					status: member.status as 'lunas' | 'belum'
 				}))
@@ -128,12 +112,14 @@
 			// Load audit logs
 			const { data: logsData, error: logsError } = await supabase
 				.from('audit_logs')
-				.select(`
+				.select(
+					`
 					*,
 					actor:users!audit_logs_actor_id_fkey(*),
 					bill:bills!audit_logs_bill_id_fkey(id, title),
 					member:users!audit_logs_member_id_fkey(*)
-				`)
+				`
+				)
 				.order('timestamp', { ascending: false })
 				.limit(50);
 
@@ -141,26 +127,29 @@
 				console.error('Logs error:', logsError);
 				throw logsError;
 			}
-			
+
 			console.log('Audit logs loaded:', logsData?.length || 0);
 			auditLogs = logsData || [];
-			
 		} catch (err: any) {
 			console.error('Error loading admin data:', err);
 			error = `Gagal memuat data: ${err.message}`;
 		}
 	}
 
-	async function updateMemberStatus(billId: string, memberId: string, newStatus: 'lunas' | 'belum') {
+	async function updateMemberStatus(
+		billId: string,
+		memberId: string,
+		newStatus: 'lunas' | 'belum'
+	) {
 		loading = true;
 		error = '';
 
 		try {
 			// Get current status for audit log
 			const currentMember = bills
-				.find(b => b.id === billId)
-				?.members.find(m => m.member_id === memberId);
-			
+				.find((b) => b.id === billId)
+				?.members.find((m) => m.member_id === memberId);
+
 			if (!currentMember) throw new Error('Member not found');
 			const oldStatus = currentMember.status;
 
@@ -218,7 +207,9 @@
 					</div>
 
 					{#if error}
-						<div class="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-red-200">
+						<div
+							class="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-red-200"
+						>
 							{error}
 						</div>
 					{/if}
@@ -261,7 +252,9 @@
 					</div>
 
 					{#if error}
-						<div class="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-red-200">
+						<div
+							class="mb-6 rounded-lg border border-red-500/50 bg-red-500/10 px-4 py-3 text-red-200"
+						>
 							{error}
 						</div>
 					{/if}
@@ -274,8 +267,8 @@
 								type="text"
 								bind:value={otpCode}
 								placeholder="123456"
-								class="w-full rounded-lg border border-white/10 bg-white/5 py-3 px-4
-								transition-colors focus:border-primary-pink focus:outline-none text-center text-2xl tracking-widest"
+								class="w-full rounded-lg border border-white/10 bg-white/5 px-4 py-3
+								text-center text-2xl tracking-widest transition-colors focus:border-primary-pink focus:outline-none"
 								disabled={loading}
 								maxlength="6"
 							/>
@@ -317,9 +310,7 @@
 					<h1 class="mb-2 text-3xl font-bold">Admin Dashboard</h1>
 					<p class="text-white/60">Kelola semua tagihan dan status pembayaran</p>
 				</div>
-				<button on:click={exitAdminMode} class="btn-secondary">
-					Keluar Mode Admin
-				</button>
+				<button on:click={exitAdminMode} class="btn-secondary"> Keluar Mode Admin </button>
 			</div>
 
 			{#if error}
@@ -344,7 +335,10 @@
 						<Users class="h-8 w-8 text-status-lunas" />
 						<div>
 							<p class="text-2xl font-bold">
-								{bills.reduce((acc, bill) => acc + bill.members.filter(m => m.status === 'lunas').length, 0)}
+								{bills.reduce(
+									(acc, bill) => acc + bill.members.filter((m) => m.status === 'lunas').length,
+									0
+								)}
 							</p>
 							<p class="text-sm text-white/60">Pembayaran Lunas</p>
 						</div>
@@ -355,7 +349,10 @@
 						<Users class="h-8 w-8 text-status-belum" />
 						<div>
 							<p class="text-2xl font-bold">
-								{bills.reduce((acc, bill) => acc + bill.members.filter(m => m.status === 'belum').length, 0)}
+								{bills.reduce(
+									(acc, bill) => acc + bill.members.filter((m) => m.status === 'belum').length,
+									0
+								)}
 							</p>
 							<p class="text-sm text-white/60">Belum Bayar</p>
 						</div>
@@ -384,11 +381,20 @@
 										<p class="font-medium">{member.user.full_name}</p>
 										<p class="text-sm text-white/60">Rp {bill.per_person.toLocaleString()}</p>
 										<div class="mt-2 flex items-center gap-2">
-											<span class="text-xs px-2 py-1 rounded-full {member.status === 'lunas' ? 'bg-green-500/20 text-green-300' : 'bg-red-500/20 text-red-300'}">
+											<span
+												class="rounded-full px-2 py-1 text-xs {member.status === 'lunas'
+													? 'bg-green-500/20 text-green-300'
+													: 'bg-red-500/20 text-red-300'}"
+											>
 												{member.status}
 											</span>
 											<button
-												on:click={() => updateMemberStatus(bill.id, member.member_id, member.status === 'lunas' ? 'belum' : 'lunas')}
+												on:click={() =>
+													updateMemberStatus(
+														bill.id,
+														member.member_id,
+														member.status === 'lunas' ? 'belum' : 'lunas'
+													)}
 												class="text-xs text-primary-pink hover:underline"
 												disabled={loading}
 											>
