@@ -12,7 +12,7 @@
 	onMount(() => {
 		notificationManager = NotificationManager.getInstance();
 		permissionStatus = Notification.permission;
-		
+
 		// Check if notifications are already enabled
 		enabled = permissionStatus === 'granted';
 	});
@@ -25,7 +25,7 @@
 				enabled = true;
 				permissionStatus = 'granted';
 				onToggle(true);
-				
+
 				// Show test notification
 				await notificationManager.showNotification('Reminder Aktif!', {
 					body: 'Kamu akan mendapat notifikasi untuk tagihan yang akan jatuh tempo.',
@@ -62,21 +62,19 @@
 	}
 </script>
 
-<div class="flex items-center justify-between p-4 bg-white rounded-lg border border-gray-200">
+<div class="flex items-center justify-between rounded-lg border border-gray-200 bg-white p-4">
 	<div class="flex items-center space-x-3">
-		<div class="p-2 bg-blue-100 rounded-lg">
+		<div class="rounded-lg bg-blue-100 p-2">
 			{#if enabled}
-				<Bell class="w-5 h-5 text-blue-600" />
+				<Bell class="h-5 w-5 text-blue-600" />
 			{:else}
-				<BellOff class="w-5 h-5 text-gray-600" />
+				<BellOff class="h-5 w-5 text-gray-600" />
 			{/if}
 		</div>
-		
+
 		<div>
 			<h3 class="font-medium text-gray-900">Reminder Notifikasi</h3>
-			<p class="text-sm text-gray-500">
-				Dapatkan notifikasi untuk tagihan yang akan jatuh tempo
-			</p>
+			<p class="text-sm text-gray-500">Dapatkan notifikasi untuk tagihan yang akan jatuh tempo</p>
 		</div>
 	</div>
 
@@ -84,28 +82,36 @@
 		<span class="text-sm font-medium {getStatusColor()}">
 			{getStatusText()}
 		</span>
-		
+
 		<button
 			on:click={toggleReminder}
 			disabled={permissionStatus === 'denied'}
-			class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed {enabled ? 'bg-blue-600' : 'bg-gray-200'}"
+			class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 {enabled
+				? 'bg-blue-600'
+				: 'bg-gray-200'}"
+			aria-label="Toggle notifications"
+			title="Toggle notifications"
+			aria-labelledby="notifications-toggle"
 		>
 			<span
-				class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {enabled ? 'translate-x-6' : 'translate-x-1'}"
-			/>
+				class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {enabled
+					? 'translate-x-6'
+					: 'translate-x-1'}"
+			>
+			</span>
 		</button>
 	</div>
 </div>
 
 {#if permissionStatus === 'denied'}
-	<div class="mt-3 p-3 bg-red-50 border border-red-200 rounded-lg">
+	<div class="mt-3 rounded-lg border border-red-200 bg-red-50 p-3">
 		<p class="text-sm text-red-700">
-			<strong>Notifikasi ditolak.</strong> 
+			<strong>Notifikasi ditolak.</strong>
 			Untuk mengaktifkan, buka pengaturan browser dan izinkan notifikasi untuk situs ini.
 		</p>
 	</div>
 {:else if permissionStatus === 'default'}
-	<div class="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+	<div class="mt-3 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
 		<p class="text-sm text-yellow-700">
 			Klik tombol di atas untuk mengaktifkan reminder notifikasi.
 		</p>
